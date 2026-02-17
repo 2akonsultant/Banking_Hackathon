@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions - Hackathon IDE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .actions {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .status-evaluated {
+            background: #28a745;
+            color: white;
+        }
+        
+        .score {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .score-high {
+            color: #28a745;
+        }
+        
+        .score-medium {
+            color: #ffc107;
+        }
+        
+        .score-low {
+            color: #dc3545;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .score-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .score-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Submissions & Evaluations</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-size: 0.9em; opacity: 0.9;">Admin: {{ session.admin_username if session.admin_username else 'Admin' }}</span>
+                <a href="/" class="btn btn-secondary">Back to Problems</a>
+                <a href="/admin/logout" class="btn btn-secondary" style="background: #dc3545;">Logout</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="actions">
+                <a href="/export/excel" class="btn btn-success">📥 Export to Excel</a>
+                <button onclick="refreshSubmissions()" class="btn btn-primary">🔄 Refresh</button>
+            </div>
+            
+            <table id="submissionsTable">
+                <thead>
+                    <tr>
+                        <th>Candidate Name</th>
+                        <th>Email</th>
+                        <th>Problem</th>
+                        <th>GitHub Link</th>
+                        <th>Status</th>
+                        <th>Total Score</th>
+                        <th>Submission Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsBody">
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            Loading submissions...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Evaluation Modal -->
+    <div id="evaluationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Evaluate Submission</h2>
+            <form id="evaluationForm">
+                <input type="hidden" id="evalCandidateId">
+                
+                <div class="score-grid">
+                    <div class="score-section">
+                        <h4>Database Layer (30 points)</h4>
+                        <div class="form-group">
+                            <label>Schema Design (0-10)</label>
+                            <input type="number" id="db_schema" min="0" max="10" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>PL/SQL Packages (0-10)</label>
+                            <input type="number" id="db_plsql" min="0" max="10" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Procedures & Functions (0-10)</label>
+                            <input type="number" id="db_procedures" min="0" max="10" step="0.5" required>
+                        </div>
+                    </div>
+                    
+                    <div class="score-section">
+                        <h4>REST API Layer (25 points)</h4>
+                        <div class="form-group">
+                            <label>API Design (0-10)</label>
+                            <input type="number" id="api_design" min="0" max="10" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Integration (0-10)</label>
+                            <input type="number" id="api_integration" min="0" max="10" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Documentation (0-5)</label>
+                            <input type="number" id="api_docs" min="0" max="5" step="0.5" required>
+                        </div>
+                    </div>
+                    
+                    <div class="score-section">
+                        <h4>Code Quality (20 points)</h4>
+                        <div class="form-group">
+                            <label>Architecture (0-8)</label>
+                            <input type="number" id="code_architecture" min="0" max="8" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Error Handling (0-6)</label>
+                            <input type="number" id="code_error_handling" min="0" max="6" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Code Organization (0-6)</label>
+                            <input type="number" id="code_organization" min="0" max="6" step="0.5" required>
+                        </div>
+                    </div>
+                    
+                    <div class="score-section">
+                        <h4>Testing & Documentation (15 points)</h4>
+                        <div class="form-group">
+                            <label>Unit Tests (0-5)</label>
+                            <input type="number" id="test_unit" min="0" max="5" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Integration Tests (0-5)</label>
+                            <input type="number" id="test_integration" min="0" max="5" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>README (0-5)</label>
+                            <input type="number" id="test_readme" min="0" max="5" step="0.5" required>
+                        </div>
+                    </div>
+                    
+                    <div class="score-section">
+                        <h4>Bonus Points (10 points)</h4>
+                        <div class="form-group">
+                            <label>Docker Setup (0-5)</label>
+                            <input type="number" id="bonus_docker" min="0" max="5" step="0.5" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>UI Implementation (0-5)</label>
+                            <input type="number" id="bonus_ui" min="0" max="5" step="0.5" value="0">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Evaluator Name</label>
+                    <input type="text" id="evaluator_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="evaluator_notes" rows="4" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Evaluation</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        async function loadSubmissions() {
+            try {
+                const response = await fetch('/api/submissions');
+                const submissions = await response.json();
+                
+                const tbody = document.getElementById('submissionsBody');
+                
+                if (submissions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No submissions yet.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = submissions.map(sub => {
+                    const statusClass = sub.status === 'evaluated' ? 'status-evaluated' : 'status-pending';
+                    const score = sub.total_score || 0;
+                    let scoreClass = 'score-low';
+                    if (score >= 70) scoreClass = 'score-high';
+                    else if (score >= 50) scoreClass = 'score-medium';
+                    
+                    return `
+                        <tr>
+                            <td>${sub.candidate_name || 'N/A'}</td>
+                            <td>${sub.candidate_email || 'N/A'}</td>
+                            <td>${sub.problem_id || 'N/A'}</td>
+                            <td><a href="${sub.github_link}" target="_blank" style="color: #667eea;">${sub.github_link || 'N/A'}</a></td>
+                            <td><span class="status-badge ${statusClass}">${sub.status || 'pending'}</span></td>
+                            <td><span class="score ${scoreClass}">${score.toFixed(2)}</span></td>
+                            <td>${new Date(sub.submission_time).toLocaleString()}</td>
+                            <td>
+                                <button onclick="evaluateSubmission('${sub.candidate_id}')" class="btn btn-primary" style="padding: 5px 15px; font-size: 0.9em;">Evaluate</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading submissions:', error);
+                document.getElementById('submissionsBody').innerHTML = 
+                    '<tr><td colspan="8" style="text-align: center; padding: 40px; color: red;">Error loading submissions.</td></tr>';
+            }
+        }
+        
+        function evaluateSubmission(candidateId) {
+            document.getElementById('evalCandidateId').value = candidateId;
+            document.getElementById('evaluationModal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('evaluationModal').style.display = 'none';
+            document.getElementById('evaluationForm').reset();
+        }
+        
+        function refreshSubmissions() {
+            loadSubmissions();
+        }
+        
+        document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const candidateId = document.getElementById('evalCandidateId').value;
+            const evaluationData = {
+                db_schema: document.getElementById('db_schema').value,
+                db_plsql: document.getElementById('db_plsql').value,
+                db_procedures: document.getElementById('db_procedures').value,
+                api_design: document.getElementById('api_design').value,
+                api_integration: document.getElementById('api_integration').value,
+                api_docs: document.getElementById('api_docs').value,
+                code_architecture: document.getElementById('code_architecture').value,
+                code_error_handling: document.getElementById('code_error_handling').value,
+                code_organization: document.getElementById('code_organization').value,
+                test_unit: document.getElementById('test_unit').value,
+                test_integration: document.getElementById('test_integration').value,
+                test_readme: document.getElementById('test_readme').value,
+                bonus_docker: document.getElementById('bonus_docker').value,
+                bonus_ui: document.getElementById('bonus_ui').value,
+                evaluator_name: document.getElementById('evaluator_name').value,
+                evaluator_notes: document.getElementById('evaluator_notes').value
+            };
+            
+            try {
+                const response = await fetch(`/evaluate/${candidateId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(evaluationData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Evaluation submitted! Total Score: ${result.total_score}`);
+                    closeModal();
+                    loadSubmissions();
+                } else {
+                    alert('Error submitting evaluation. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting evaluation. Please try again.');
+            }
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('evaluationModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Load submissions on page load
+        loadSubmissions();
+    </script>
+</body>
+</html>
+

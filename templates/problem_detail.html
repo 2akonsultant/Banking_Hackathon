@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ problem.title }} - Hackathon IDE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header .theme {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-style: italic;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .section p, .section li {
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .section ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .submit-section {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 40px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .requirements-box {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .requirements-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .requirements-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .requirements-box li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #2196F3;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ problem.title }}</h1>
+            <div class="theme">{{ problem.theme }}</div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>📝 Problem Description</h2>
+                <p>{{ problem.description }}</p>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Requirements</h2>
+                <div class="requirements-box">
+                    <h3>Database Layer:</h3>
+                    <ul>
+                        {% for table in problem.requirements.db_layer %}
+                        <li>{{ table }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <h3 style="margin-top: 20px;">PL/SQL:</h3>
+                    <p>{{ problem.requirements.plsql }}</p>
+                    
+                    <h3 style="margin-top: 20px;">REST APIs:</h3>
+                    <ul>
+                        {% for api in problem.requirements.rest_apis %}
+                        <li><code>{{ api }}</code></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>⚖️ Business Rules</h2>
+                <ul>
+                    {% for rule in problem.business_rules %}
+                    <li>{{ rule }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>⏱️ Estimated Time</h2>
+                <span class="badge">{{ problem.estimated_time }}</span>
+            </div>
+            
+            <div class="submit-section">
+                <h2 style="color: #667eea; margin-bottom: 20px;">📤 Submit Your Solution</h2>
+                
+                <div id="alertBox"></div>
+                
+                <form id="submitForm">
+                    <input type="hidden" id="problemId" value="{{ problem.id }}">
+                    
+                    <div class="form-group">
+                        <label for="candidateName">Your Name *</label>
+                        <input type="text" id="candidateName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="candidateEmail">Your Email *</label>
+                        <input type="email" id="candidateEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="submissionType">Submission Type *</label>
+                        <select id="submissionType" required onchange="toggleSubmissionFields()">
+                            <option value="">Select type...</option>
+                            <option value="github">GitHub Repository Link</option>
+                            <option value="zip">ZIP File Upload</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="githubGroup" style="display: none;">
+                        <label for="githubLink">GitHub Repository URL *</label>
+                        <input type="url" id="githubLink" placeholder="https://github.com/username/repo">
+                    </div>
+                    
+                    <div class="form-group" id="zipGroup" style="display: none;">
+                        <label for="zipFile">Upload ZIP File *</label>
+                        <input type="file" id="zipFile" accept=".zip">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Submit Solution</button>
+                    <a href="/" class="btn btn-secondary">Back to Problems</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleSubmissionFields() {
+            const type = document.getElementById('submissionType').value;
+            const githubGroup = document.getElementById('githubGroup');
+            const zipGroup = document.getElementById('zipGroup');
+            const githubLink = document.getElementById('githubLink');
+            const zipFile = document.getElementById('zipFile');
+            
+            if (type === 'github') {
+                githubGroup.style.display = 'block';
+                zipGroup.style.display = 'none';
+                zipFile.required = false;
+                githubLink.required = true;
+            } else if (type === 'zip') {
+                githubGroup.style.display = 'none';
+                zipGroup.style.display = 'block';
+                githubLink.required = false;
+                zipFile.required = true;
+            } else {
+                githubGroup.style.display = 'none';
+                zipGroup.style.display = 'none';
+                githubLink.required = false;
+                zipFile.required = false;
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type}`;
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+        
+        document.getElementById('submitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                candidate_name: document.getElementById('candidateName').value,
+                candidate_email: document.getElementById('candidateEmail').value,
+                problem_id: document.getElementById('problemId').value,
+                submission_type: document.getElementById('submissionType').value,
+                github_link: document.getElementById('githubLink').value || ''
+            };
+            
+            // Handle file upload if ZIP
+            if (formData.submission_type === 'zip') {
+                const fileInput = document.getElementById('zipFile');
+                if (!fileInput.files[0]) {
+                    showAlert('Please select a ZIP file', 'error');
+                    return;
+                }
+                
+                const fileData = new FormData();
+                fileData.append('file', fileInput.files[0]);
+                fileData.append('data', JSON.stringify(formData));
+                
+                // For ZIP upload, we'd need to modify the endpoint
+                // For now, show message
+                showAlert('ZIP file upload will be handled by backend. Please use GitHub link for now.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(`Submission successful! Your Candidate ID: ${result.candidate_id}`, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/submissions';
+                    }, 2000);
+                } else {
+                    showAlert('Submission failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('Error submitting solution. Please try again.', 'error');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
+
